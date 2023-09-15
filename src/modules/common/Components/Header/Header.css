@@ -1,0 +1,14 @@
+.left-bar {
+    display: flex;
+}
+.create-board {
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    border-radius: 8px;
+    background: #edf2f7;
+    color: black;
+    padding: 0 1.5rem;
+}

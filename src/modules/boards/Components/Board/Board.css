@@ -1,0 +1,15 @@
+.board {
+    flex-basis: 23%;
+    cursor: pointer;
+    border-radius: 5px;
+}
+.board-details {
+    padding: 1rem;
+    color: white;
+    display: flex;
+    flex-direction: column;
+    gap: 3rem;
+}
+.board-details img {
+    align-self: flex-end;
+}
