@@ -1,3 +1,15 @@
 .boards-flex {
     flex-wrap: wrap;
 }
+.create-board {
+    flex-basis: 23%;
+}
+.board-details img {
+    margin-right: -2rem;
+    transition: 0.15s ease-in-out;
+
+    transition-property: color, margin;
+}
+.board-details .star {
+    margin-right: 0rem;
+}

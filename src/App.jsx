@@ -2,7 +2,7 @@ import { useState } from "react";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import Header from "./modules/common/Components/Header/Header";
 import Boards from "./modules/boards/Components/Boards/Boards";
-import BoardDetails from "./modules/boardsDetails/Components/BoardDetails";
+import BoardDetails from "./modules/boardsDetails/Components/BoardDetails/BoardDetails";
 
 function App() {
     const [count, setCount] = useState(0);

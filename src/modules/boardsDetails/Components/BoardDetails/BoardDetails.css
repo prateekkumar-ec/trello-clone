@@ -1,0 +1,15 @@
+.board-lists-flex {
+    display: flex;
+    flex-direction: column;
+    align-content: flex-start;
+    flex-wrap: wrap;
+    height: 90%;
+    overflow-x: scroll;
+}
+.board-lists-flex::-webkit-scrollbar {
+    display: none;
+}
+.board-bg-container {
+    height: 93.2vh;
+    width: 100vw;
+}

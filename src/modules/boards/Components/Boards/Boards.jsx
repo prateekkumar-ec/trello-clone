@@ -1,3 +1,4 @@
+import { Popover, PopoverTrigger, PopoverContent, PopoverHeader, PopoverBody, PopoverFooter, PopoverArrow, PopoverCloseButton, PopoverAnchor } from "@chakra-ui/react";
 import axios from "axios";
 import Board from "../Board/Board";
 import CreateBoardForm from "../../../common/Components/CreateBoardForm/CreateBoardForm";
@@ -9,7 +10,6 @@ import "./Boards.css";
 function Boards() {
     const [boards, setBoards] = useState([]);
     const [isLoaded, setIsLoaded] = useState(false);
-    const [isFormOpen, setIsFormOpen] = useState(true);
     function getBoards(url) {
         axios.get(url).then((res) => {
             if (res.status == 200) {
@@ -24,15 +24,30 @@ function Boards() {
         getBoards(url);
     }, []);
 
+    function showCreateBoardForm() {
+        setIsFormOpen(!isFormOpen);
+    }
     function CreateNewBoard() {
         return (
-            <Box className={"board"} bg="#333C43" h="8rem">
-                <Flex height="8rem" margin="auto" justify="center" align="center">
-                    <Text margin="auto" color="white">
-                        Create new board
-                    </Text>
-                </Flex>
-            </Box>
+            <Popover>
+                <PopoverTrigger>
+                    <Box className={"board create-board"} bg="#333C43" h="8rem">
+                        <Flex height="8rem" margin="auto" justify="center" align="center">
+                            <Text margin="auto" color="white">
+                                Create new board
+                            </Text>
+                        </Flex>
+                    </Box>
+                </PopoverTrigger>
+                <PopoverContent>
+                    <PopoverArrow />
+                    <PopoverCloseButton />
+                    <PopoverHeader>Create Board</PopoverHeader>
+                    <PopoverBody>
+                        <CreateBoardForm getBoards={getBoards}></CreateBoardForm>
+                    </PopoverBody>
+                </PopoverContent>
+            </Popover>
         );
     }
     if (isLoaded) {
@@ -40,7 +55,6 @@ function Boards() {
             <>
                 <Flex className={"boards-flex"} width="60%" margin="auto" gap="1.5rem" marginTop={"2rem"}>
                     <CreateNewBoard />
-                    {isFormOpen && <CreateBoardForm />}
                     {boards.map((board) => {
                         return <Board key={board.id} board={board} />;
                     })}
