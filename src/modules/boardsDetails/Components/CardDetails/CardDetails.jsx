@@ -22,22 +22,43 @@ import {
     Editable,
     EditablePreview,
     EditableInput,
+    Popover,
+    PopoverTrigger,
+    PopoverContent,
+    PopoverHeader,
+    PopoverBody,
+    PopoverFooter,
+    PopoverArrow,
+    PopoverCloseButton,
+    PopoverAnchor,
+    AlertDialog,
+    AlertDialogBody,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogContent,
+    AlertDialogOverlay,
+    AlertDialogCloseButton,
 } from "@chakra-ui/react";
 import { EditIcon, CheckIcon, AddIcon } from "@chakra-ui/icons";
 import axios from "axios";
 import { useEffect, useState } from "react";
+import React from "react";
+import CardChecklist from "../CardChecklist/CardChecklist";
+import config from "../../../../../config";
+
+const apiKey = config.apiKey;
+const token = config.token;
 
 function CardDetails({ card }) {
     const [checklists, setChecklists] = useState();
     const [isChecklistLoaded, setIsChecklistLoaded] = useState(false);
     useEffect(() => {
-        getCheckLists();
+        getChecklists();
     }, []);
-    function getCheckLists() {
-        axios(
-            `https://api.trello.com/1/cards/${card.id}/checklists?key=4eec852d0aa570f6b51d0e9a2a58356e&token=ATTA4e4e36552ff74519e3fbed4812cdbd67a2aea1d95f113ef01ed800d6408e03b6A8776DBB`,
-            { method: "GET" }
-        )
+    function getChecklists() {
+        axios(`https://api.trello.com/1/cards/${card.id}/checklists?key=${apiKey}&token=${token}`, {
+            method: "GET",
+        })
             .then((response) => {
                 setChecklists(response.data);
                 setIsChecklistLoaded(true);
@@ -46,39 +67,34 @@ function CardDetails({ card }) {
                 console.log(error);
             });
     }
-    function createCheckList(name) {
-        axios(
-            `https://api.trello.com/1/checklists?idCard=${card.id}&key=4eec852d0aa570f6b51d0e9a2a58356e&token=ATTA4e4e36552ff74519e3fbed4812cdbd67a2aea1d95f113ef01ed800d6408e03b6A8776DBB`,
-            {
-                method: "POST",
-                params: {
-                    name: name,
-                },
-            }
-        )
+    function createChecklist(name) {
+        if (name == "") {
+            return;
+        }
+        axios(`https://api.trello.com/1/checklists?idCard=${card.id}&key=${apiKey}&token=${token}`, {
+            method: "POST",
+            params: {
+                name: name,
+            },
+        })
             .then((response) => {
-                console.log(response);
-                getCheckLists();
+                getChecklists();
             })
             .catch((error) => {
                 console.log(error);
             });
     }
+
     if (isChecklistLoaded) {
         return (
             <Flex justify={"space-between"} paddingBottom={"2rem"}>
-                <Flex direction={"column"} gap={"2rem"}>
+                <Flex direction={"column"} gap={"2rem"} flexBasis={"75%"}>
                     {checklists.map((checklist) => {
-                        return (
-                            <Flex key={checklist.id} gap={"1rem"} className="checklist-header" align={"center"}>
-                                <CheckIcon></CheckIcon>
-                                <Text>{checklist.name}</Text>
-                            </Flex>
-                        );
+                        return <CardChecklist key={checklist.id} checklist={checklist} getChecklists={getChecklists} card={card} />;
                     })}
                 </Flex>
 
-                <Flex direction={"column"}>
+                <Flex direction={"column"} gap={"1rem"}>
                     <Text>Add to card</Text>
                     <Menu>
                         <MenuButton as={Button}>
@@ -87,10 +103,10 @@ function CardDetails({ card }) {
                                 <Text>Checklist</Text>
                             </Flex>
                         </MenuButton>
-                        <MenuList padding={"1rem"}>
+                        <MenuList background={"#323940"} padding={"1rem"} border={"1px solid white"}>
                             <Flex marginLeft={"1rem"} gap={"1rem"} alignItems={"center"}>
                                 <AddIcon />
-                                <Editable onSubmit={createCheckList} placeholder={"Add checklist"} defaultValue="">
+                                <Editable onSubmit={createChecklist} placeholder={"Add checklist"} defaultValue="">
                                     <EditablePreview cursor={"pointer"} />
                                     <EditableInput />
                                 </Editable>

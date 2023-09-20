@@ -5,6 +5,10 @@ import { Flex, Container, Editable, EditableInput, EditableTextarea, EditablePre
 import { AddIcon } from "@chakra-ui/icons";
 
 import "./BoardDetails.css";
+import config from "../../../../../config";
+
+const apiKey = config.apiKey;
+const token = config.token;
 
 import axios from "axios";
 function BoardDetails() {
@@ -19,12 +23,9 @@ function BoardDetails() {
     }, []);
 
     function getBoardLists() {
-        axios(
-            `https://api.trello.com/1/boards/${id}/lists?key=4eec852d0aa570f6b51d0e9a2a58356e&token=ATTA4e4e36552ff74519e3fbed4812cdbd67a2aea1d95f113ef01ed800d6408e03b6A8776DBB`,
-            {
-                method: "GET",
-            }
-        )
+        axios(`https://api.trello.com/1/boards/${id}/lists?key=${apiKey}&token=${token}`, {
+            method: "GET",
+        })
             .then((res) => {
                 setBoardLists(res.data);
                 setIsListsLoaded(true);
@@ -34,7 +35,7 @@ function BoardDetails() {
             });
     }
     function getBoardImage() {
-        axios(`https://api.trello.com/1/boards/${id}?key=4eec852d0aa570f6b51d0e9a2a58356e&token=ATTA4e4e36552ff74519e3fbed4812cdbd67a2aea1d95f113ef01ed800d6408e03b6A8776DBB`, {
+        axios(`https://api.trello.com/1/boards/${id}?key=${apiKey}&token=${token}`, {
             method: "GET",
         })
             .then((res) => {

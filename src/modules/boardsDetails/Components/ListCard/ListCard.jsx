@@ -27,12 +27,15 @@ import { EditIcon, CheckIcon, AddIcon } from "@chakra-ui/icons";
 import axios from "axios";
 import CheckListIcon from "../../../../assets/checklistIcon.svg";
 import CardDetails from "../CardDetails/CardDetails";
+import config from "../../../../../config";
 
+const apiKey = config.apiKey;
+const token = config.token;
 function ListCard({ card, getCards }) {
     const { isOpen, onOpen, onClose } = useDisclosure();
 
     function deleteCard() {
-        axios(`https://api.trello.com/1/cards/${card.id}?key=4eec852d0aa570f6b51d0e9a2a58356e&token=ATTA4e4e36552ff74519e3fbed4812cdbd67a2aea1d95f113ef01ed800d6408e03b6A8776DBB`, {
+        axios(`https://api.trello.com/1/cards/${card.id}?key=${apiKey}&token=${token}`, {
             method: "DELETE",
         })
             .then((response) => {
@@ -47,7 +50,7 @@ function ListCard({ card, getCards }) {
         <>
             <Flex marginTop={"0.6rem"}>
                 <Flex justifyContent={"space-between"} alignItems={"center"} width={"100%"}>
-                    <Button flexBasis={"100%"} fontSize={"1rem"} bg={"#282E33"} onClick={onOpen} flexBasis={"100%"} color={"#818B95"} justifyContent={"flex-start"}>
+                    <Button flexBasis={"100%"} fontSize={"1rem"} bg={"#282E33"} onClick={onOpen} color={"#818B95"} justifyContent={"flex-start"}>
                         <Text>{card.name}</Text>
                     </Button>
                     <Menu>
@@ -61,12 +64,14 @@ function ListCard({ card, getCards }) {
                 </Flex>
             </Flex>
 
-            <Modal isOpen={isOpen} onClose={onClose} size={"3xl"} colorScheme={"#323940"}>
+            <Modal isOpen={isOpen} onClose={onClose} size={"3xl"}>
                 <ModalOverlay />
                 <ModalContent>
-                    <ModalHeader>{card.name}</ModalHeader>
-                    <ModalCloseButton />
-                    <ModalBody>
+                    <ModalHeader background={"#323940"} color={"white"}>
+                        {card.name}
+                    </ModalHeader>
+                    <ModalCloseButton color={"white"} />
+                    <ModalBody background={"#323940"} color={"white"}>
                         <CardDetails card={card} />
                     </ModalBody>
                 </ModalContent>

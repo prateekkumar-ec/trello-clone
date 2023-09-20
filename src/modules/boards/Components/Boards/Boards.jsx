@@ -7,6 +7,12 @@ import { Flex, Box, Text } from "@chakra-ui/react";
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import "./Boards.css";
+
+import config from "../../../../../config";
+
+const apiKey = config.apiKey;
+const token = config.token;
+
 function Boards() {
     const [boards, setBoards] = useState([]);
     const [isLoaded, setIsLoaded] = useState(false);
@@ -19,8 +25,7 @@ function Boards() {
         });
     }
     useEffect(() => {
-        const url =
-            "https://api.trello.com/1/members/me/boards?key=4eec852d0aa570f6b51d0e9a2a58356e&token=ATTA4e4e36552ff74519e3fbed4812cdbd67a2aea1d95f113ef01ed800d6408e03b6A8776DBB";
+        const url = `https://api.trello.com/1/members/me/boards?key=${apiKey}&token=${token}`;
         getBoards(url);
     }, []);
 

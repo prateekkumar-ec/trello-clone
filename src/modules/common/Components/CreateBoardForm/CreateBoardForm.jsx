@@ -2,6 +2,10 @@ import { FormControl, Input, Button, Flex, Stack, FormLabel } from "@chakra-ui/r
 import { useState } from "react";
 import axios from "axios";
 import "./CreateBoardForm.css";
+import config from "../../../../../config";
+
+const apiKey = config.apiKey;
+const token = config.token;
 function CreateBoardForm({ getBoards }) {
     const [isCreateDisable, setIsCreateDisable] = useState(true);
     const [newBoardName, setNewBoardName] = useState("");
@@ -14,19 +18,14 @@ function CreateBoardForm({ getBoards }) {
         }
     }
     function createBoard() {
-        axios(
-            `https://api.trello.com/1/boards/?name=${newBoardName}&key=4eec852d0aa570f6b51d0e9a2a58356e&token=ATTA4e4e36552ff74519e3fbed4812cdbd67a2aea1d95f113ef01ed800d6408e03b6A8776DBB`,
-            {
-                method: "POST",
-            }
-        )
+        axios(`https://api.trello.com/1/boards/?name=${newBoardName}&key=${apiKey}}&token=${token}`, {
+            method: "POST",
+        })
             .then((response) => {
                 return response;
             })
             .then((data) => {
-                getBoards(
-                    "https://api.trello.com/1/members/me/boards?key=4eec852d0aa570f6b51d0e9a2a58356e&token=ATTA4e4e36552ff74519e3fbed4812cdbd67a2aea1d95f113ef01ed800d6408e03b6A8776DBB"
-                );
+                getBoards(`https://api.trello.com/1/members/me/boards?key=${apiKey}&token=${token}`);
             })
             .catch((err) => console.error(err));
     }

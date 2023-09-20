@@ -23,6 +23,10 @@ import "./BoardList.css";
 import axios from "axios";
 import ListCard from "../ListCard/ListCard";
 import { useEffect, useState } from "react";
+import config from "../../../../../config";
+
+const apiKey = config.apiKey;
+const token = config.token;
 
 function BoardList({ list, getBoardLists }) {
     const [cards, setCards] = useState([]);
@@ -32,15 +36,12 @@ function BoardList({ list, getBoardLists }) {
     }, []);
 
     function getCards() {
-        axios(
-            `https://api.trello.com/1/lists/${list.id}/cards?key=4eec852d0aa570f6b51d0e9a2a58356e&token=ATTA4e4e36552ff74519e3fbed4812cdbd67a2aea1d95f113ef01ed800d6408e03b6A8776DBB`,
-            {
-                method: "GET",
-                headers: {
-                    Accept: "application/json",
-                },
-            }
-        )
+        axios(`https://api.trello.com/1/lists/${list.id}/cards?key=${apiKey}&token=${token}`, {
+            method: "GET",
+            headers: {
+                Accept: "application/json",
+            },
+        })
             .then((response) => {
                 setCards(response.data);
             })
@@ -50,12 +51,9 @@ function BoardList({ list, getBoardLists }) {
     }
 
     function archiveList() {
-        axios(
-            `https://api.trello.com/1/lists/${list.id}/?closed=true&&key=4eec852d0aa570f6b51d0e9a2a58356e&token=ATTA4e4e36552ff74519e3fbed4812cdbd67a2aea1d95f113ef01ed800d6408e03b6A8776DBB`,
-            {
-                method: "PUT",
-            }
-        )
+        axios(`https://api.trello.com/1/lists/${list.id}/?closed=true&&key=${apiKey}&token=${token}`, {
+            method: "PUT",
+        })
             .then((response) => {
                 if (response.status == 200) {
                     getBoardLists();
@@ -69,18 +67,15 @@ function BoardList({ list, getBoardLists }) {
         if (event == "") {
             return;
         }
-        axios(
-            `https://api.trello.com/1/cards?&idList=${list.id}&key=4eec852d0aa570f6b51d0e9a2a58356e&token=ATTA4e4e36552ff74519e3fbed4812cdbd67a2aea1d95f113ef01ed800d6408e03b6A8776DBB`,
-            {
-                method: "POST",
-                headers: {
-                    Accept: "application/json",
-                },
-                params: {
-                    name: event,
-                },
-            }
-        )
+        axios(`https://api.trello.com/1/cards?&idList=${list.id}&key=${apiKey}&token=${token}`, {
+            method: "POST",
+            headers: {
+                Accept: "application/json",
+            },
+            params: {
+                name: event,
+            },
+        })
             .then((response) => {
                 getCards();
             })
@@ -94,9 +89,9 @@ function BoardList({ list, getBoardLists }) {
             <List background="#101204" color="white" padding={"1rem"} borderRadius={"7px"} alignSelf={"flex-start"}>
                 <ListItem>
                     <Flex justify={"space-between"}>
-                        <Editable defaultValue={list.name}>
-                            <EditablePreview cursor={"pointer"} />
-                            <EditableInput />
+                        <Editable defaultValue={list.name} flexBasis={"80%"} width={"100%"}>
+                            <EditablePreview width={"300px"} cursor={"pointer"} />
+                            <EditableTextarea />
                         </Editable>
                         <Menu>
                             <MenuButton>
@@ -121,7 +116,7 @@ function BoardList({ list, getBoardLists }) {
                 <ListItem>
                     <Flex marginTop={"1rem"} gap={"1rem"} alignItems={"center"}>
                         <AddIcon />
-                        <Editable onSubmit={createNewCard} placeholder={"Add another list"} defaultValue="">
+                        <Editable onSubmit={createNewCard} placeholder={"Add a card"} defaultValue="">
                             <EditablePreview cursor={"pointer"} />
                             <EditableInput />
                         </Editable>
@@ -133,4 +128,3 @@ function BoardList({ list, getBoardLists }) {
 }
 
 export default BoardList;
-// https://api.trello.com/1/lists/6507d65c2ef228c851e96ed3/closed?key=4eec852d0aa570f6b51d0e9a2a58356e&token=ATTA4e4e36552ff74519e3fbed4812cdbd67a2aea1d95f113ef01ed800d6408e03b6A8776DBB
