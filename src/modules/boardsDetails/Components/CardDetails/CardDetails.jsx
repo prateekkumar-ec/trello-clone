@@ -51,47 +51,17 @@ const token = config.token;
 
 function CardDetails({ card }) {
     const [checklists, setChecklists] = useState();
-    const [isChecklistLoaded, setIsChecklistLoaded] = useState(false);
+    const [isChecklistLoaded, setIsChecklistsLoaded] = useState(false);
     useEffect(() => {
-        getChecklists();
+        getChecklists(card, setChecklists, checklists, setIsChecklistsLoaded);
     }, []);
-    function getChecklists() {
-        axios(`https://api.trello.com/1/cards/${card.id}/checklists?key=${apiKey}&token=${token}`, {
-            method: "GET",
-        })
-            .then((response) => {
-                setChecklists(response.data);
-                setIsChecklistLoaded(true);
-            })
-            .catch((error) => {
-                console.log(error);
-            });
-    }
-    function createChecklist(name) {
-        if (name == "") {
-            return;
-        }
-        axios(`https://api.trello.com/1/checklists?idCard=${card.id}&key=${apiKey}&token=${token}`, {
-            method: "POST",
-            params: {
-                name: name,
-            },
-        })
-            .then((response) => {
-                setChecklists([...checklists, response.data]);
-                setIsChecklistLoaded(true);
-            })
-            .catch((error) => {
-                console.log(error);
-            });
-    }
 
     if (isChecklistLoaded) {
         return (
             <Flex justify={"space-between"} paddingBottom={"2rem"}>
                 <Flex direction={"column"} gap={"2rem"} flexBasis={"75%"}>
                     {checklists.map((checklist) => {
-                        return <CardChecklist key={checklist.id} checklist={checklist} getChecklists={getChecklists} card={card} />;
+                        return <CardChecklist key={checklist.id} checklist={checklist} setChecklists={setChecklists} checklists={checklists} card={card} />;
                     })}
                 </Flex>
 
@@ -107,7 +77,12 @@ function CardDetails({ card }) {
                         <MenuList background={"#323940"} padding={"1rem"} border={"1px solid white"}>
                             <Flex marginLeft={"1rem"} gap={"1rem"} alignItems={"center"}>
                                 <AddIcon />
-                                <Editable onSubmit={createChecklist} placeholder={"Add checklist"} defaultValue="">
+                                <Editable
+                                    onSubmit={(event) => createChecklist(event, card, checklists, setChecklists, setIsChecklistsLoaded)}
+                                    placeholder={"Add checklist"}
+                                    defaultValue=""
+                                    background={"#3B444C"}
+                                >
                                     <EditablePreview cursor={"pointer"} />
                                     <EditableInput />
                                 </Editable>
@@ -118,5 +93,35 @@ function CardDetails({ card }) {
             </Flex>
         );
     }
+}
+function createChecklist(name, card, checklists, setChecklists, setIsChecklistsLoaded) {
+    if (name == "") {
+        return;
+    }
+    axios(`https://api.trello.com/1/checklists?idCard=${card.id}&key=${apiKey}&token=${token}`, {
+        method: "POST",
+        params: {
+            name: name,
+        },
+    })
+        .then((response) => {
+            setChecklists([...checklists, response.data]);
+            setIsChecklistsLoaded(true);
+        })
+        .catch((error) => {
+            console.log(error);
+        });
+}
+function getChecklists(card, setChecklists, checklists, setIsChecklistsLoaded) {
+    axios(`https://api.trello.com/1/cards/${card.id}/checklists?key=${apiKey}&token=${token}`, {
+        method: "GET",
+    })
+        .then((response) => {
+            setChecklists(response.data);
+            setIsChecklistsLoaded(true);
+        })
+        .catch((error) => {
+            console.log(error);
+        });
 }
 export default CardDetails;

@@ -19,61 +19,8 @@ function BoardList({ list, boardLists, setBoardLists }) {
     const [isError, setIsError] = useState(false);
 
     useEffect(() => {
-        getCards();
+        getCards(list, setCards, setIsCardsLoaded, setIsError);
     }, []);
-
-    function getCards() {
-        axios(`https://api.trello.com/1/lists/${list.id}/cards?key=${apiKey}&token=${token}`, {
-            method: "GET",
-            headers: {
-                Accept: "application/json",
-            },
-        })
-            .then((response) => {
-                setCards(response.data);
-                setIsCardsLoaded(true);
-            })
-            .catch((error) => {
-                console.log(error);
-            });
-    }
-
-    function archiveList() {
-        axios(`https://api.trello.com/1/lists/${list.id}/?closed=true&&key=${apiKey}&token=${token}`, {
-            method: "PUT",
-        })
-            .then((response) => {
-                if (response.status == 200) {
-                    setBoardLists(() => {
-                        return boardLists.filter((boardList) => {
-                            return boardList.id != list.id;
-                        });
-                    });
-                }
-            })
-            .catch((err) => console.error(err));
-    }
-
-    function createNewCard(event) {
-        if (event == "") {
-            return;
-        }
-        axios(`https://api.trello.com/1/cards?&idList=${list.id}&key=${apiKey}&token=${token}`, {
-            method: "POST",
-            headers: {
-                Accept: "application/json",
-            },
-            params: {
-                name: event,
-            },
-        })
-            .then((response) => {
-                setCards([...cards, response.data]);
-            })
-            .catch((error) => {
-                console.log(error);
-            });
-    }
 
     return (
         <div className="board-list">
@@ -89,7 +36,7 @@ function BoardList({ list, boardLists, setBoardLists }) {
                                 <img src={ThreeDots}></img>
                             </MenuButton>
                             <MenuList bgColor={"#282E33"}>
-                                <MenuItem onClick={archiveList} bg={"#282E33"}>
+                                <MenuItem onClick={() => archiveList(list, setBoardLists, boardLists)} bg={"#282E33"}>
                                     Archive List
                                 </MenuItem>
                             </MenuList>
@@ -101,7 +48,7 @@ function BoardList({ list, boardLists, setBoardLists }) {
                     cards.map((card) => {
                         return (
                             <ListItem key={card.id}>
-                                <ListCard card={card} getCards={getCards}></ListCard>
+                                <ListCard card={card} setCards={setCards} cards={cards}></ListCard>
                             </ListItem>
                         );
                     })
@@ -117,7 +64,7 @@ function BoardList({ list, boardLists, setBoardLists }) {
                 <ListItem>
                     <Flex marginTop={"1rem"} gap={"1rem"} alignItems={"center"}>
                         <AddIcon />
-                        <Editable onSubmit={createNewCard} placeholder={"Add a card"} defaultValue="">
+                        <Editable onSubmit={(event) => createNewCard(event, list, cards, setCards)} placeholder={"Add a card"} defaultValue="">
                             <EditablePreview cursor={"pointer"} />
                             <EditableInput />
                         </Editable>
@@ -128,4 +75,57 @@ function BoardList({ list, boardLists, setBoardLists }) {
     );
 }
 
+function getCards(list, setCards, setIsCardsLoaded, setIsError) {
+    axios(`https://api.trello.com/1/lists/${list.id}/cards?key=${apiKey}&token=${token}`, {
+        method: "GET",
+        headers: {
+            Accept: "application/json",
+        },
+    })
+        .then((response) => {
+            setCards(response.data);
+            setIsCardsLoaded(true);
+        })
+        .catch((error) => {
+            setIsError(true);
+            console.log(error);
+        });
+}
+
+function archiveList(list, setBoardLists, boardLists) {
+    axios(`https://api.trello.com/1/lists/${list.id}/?closed=true&&key=${apiKey}&token=${token}`, {
+        method: "PUT",
+    })
+        .then((response) => {
+            if (response.status == 200) {
+                setBoardLists(() => {
+                    return boardLists.filter((boardList) => {
+                        return boardList.id != list.id;
+                    });
+                });
+            }
+        })
+        .catch((err) => console.error(err));
+}
+
+function createNewCard(event, list, cards, setCards) {
+    if (event == "") {
+        return;
+    }
+    axios(`https://api.trello.com/1/cards?&idList=${list.id}&key=${apiKey}&token=${token}`, {
+        method: "POST",
+        headers: {
+            Accept: "application/json",
+        },
+        params: {
+            name: event,
+        },
+    })
+        .then((response) => {
+            setCards([...cards, response.data]);
+        })
+        .catch((error) => {
+            console.log(error);
+        });
+}
 export default BoardList;

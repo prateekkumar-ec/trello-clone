@@ -22,62 +22,14 @@ import config from "../../../../../config";
 const apiKey = config.apiKey;
 const token = config.token;
 
-function CardChecklist({ checklist, getChecklists, card }) {
+function CardChecklist({ checklist, setChecklists, checklists, card }) {
     const [checkItems, setCheckItems] = useState([]);
     const [isCheckItemsLoaded, setIsCheckItemsLoaded] = useState(false);
     const [progressInfo, setProgressInfo] = useState({ value: 0, checked: 0, length: 0 });
 
     useEffect(() => {
-        getCheckItems();
+        getCheckItems(checklist, setCheckItems, setProgressInfo, progressInfo, setIsCheckItemsLoaded);
     }, []);
-
-    function getCheckItems() {
-        axios(`https://api.trello.com/1/checklists/${checklist.id}/checkItems?key=${apiKey}&token=${token}`, { method: "GET" })
-            .then((response) => {
-                setCheckItems(response.data);
-                setProgressInfo(() => {
-                    if (response.data.length == 0) {
-                        return progressInfo;
-                    }
-                    let new_checked = 0;
-                    for (let item of response.data) {
-                        if (item.state == "complete") {
-                            new_checked++;
-                        }
-                    }
-                    let newProgress = new_checked / response.data.length;
-                    newProgress *= 100;
-
-                    return { length: response.data.length, value: newProgress, checked: new_checked };
-                });
-                setIsCheckItemsLoaded(true);
-            })
-            .catch((error) => {
-                console.log(error);
-            });
-    }
-
-    function deleteChecklist() {
-        axios(`https://api.trello.com/1/checklists/${checklist.id}?key=${apiKey}&token=${token}`, {
-            method: "Delete",
-        }).then((response) => {
-            getChecklists();
-        });
-    }
-    function createCheckItem(name) {
-        if (name == "") {
-            return;
-        }
-        axios(`https://api.trello.com/1/checklists/${checklist.id}/checkItems?name=${name}&key=${apiKey}&token=${token}`, {
-            method: "POST",
-        })
-            .then((response) => {
-                getCheckItems();
-            })
-            .catch((error) => {
-                console.log(error);
-            });
-    }
 
     if (checkItems) {
         return (
@@ -97,7 +49,7 @@ function CardChecklist({ checklist, getChecklists, card }) {
                                 <PopoverCloseButton color={"black"} />
                                 <PopoverHeader color={"black"}>Are you sure?</PopoverHeader>
                                 <PopoverBody>
-                                    <Button onClick={deleteChecklist} colorScheme="red" ml={3}>
+                                    <Button onClick={() => deleteChecklist(checklist, setChecklists, checklists)} colorScheme="red" ml={3}>
                                         Delete
                                     </Button>
                                 </PopoverBody>
@@ -117,10 +69,11 @@ function CardChecklist({ checklist, getChecklists, card }) {
                             <CheckItem
                                 key={checkItem.id}
                                 checklist={checklist}
-                                getCheckItems={getCheckItems}
                                 checkItem={checkItem}
                                 setProgressInfo={setProgressInfo}
                                 progressInfo={progressInfo}
+                                checkItems={checkItems}
+                                setCheckItems={setCheckItems}
                                 card={card}
                             />
                         );
@@ -128,7 +81,11 @@ function CardChecklist({ checklist, getChecklists, card }) {
                     <Flex marginTop={"0.8rem"}>
                         <Flex marginLeft={"1rem"} gap={"1rem"} alignItems={"center"} background={"#3B444C"} padding={"0.3rem 1rem"} borderRadius={"7px"}>
                             <AddIcon />
-                            <Editable onSubmit={createCheckItem} placeholder={"Add an item"} defaultValue="">
+                            <Editable
+                                onSubmit={(event) => createCheckItem(event, checklist, checkItems, setCheckItems, progressInfo, setProgressInfo)}
+                                placeholder={"Add an item"}
+                                defaultValue=""
+                            >
                                 <EditablePreview cursor={"pointer"} />
                                 <EditableInput />
                             </Editable>
@@ -140,4 +97,59 @@ function CardChecklist({ checklist, getChecklists, card }) {
     }
 }
 
+function getCheckItems(checklist, setCheckItems, setProgressInfo, progressInfo, setIsCheckItemsLoaded) {
+    axios(`https://api.trello.com/1/checklists/${checklist.id}/checkItems?key=${apiKey}&token=${token}`, { method: "GET" })
+        .then((response) => {
+            setCheckItems(response.data);
+            setProgressInfo(() => {
+                if (response.data.length == 0) {
+                    return progressInfo;
+                }
+                let new_checked = 0;
+                for (let item of response.data) {
+                    if (item.state == "complete") {
+                        new_checked++;
+                    }
+                }
+                let newProgress = new_checked / response.data.length;
+                newProgress *= 100;
+
+                return { length: response.data.length, value: newProgress, checked: new_checked };
+            });
+            setIsCheckItemsLoaded(true);
+        })
+        .catch((error) => {
+            console.log(error);
+        });
+}
+
+function createCheckItem(name, checklist, checkItems, setCheckItems, progressInfo, setProgressInfo) {
+    if (name == "") {
+        return;
+    }
+    axios(`https://api.trello.com/1/checklists/${checklist.id}/checkItems?name=${name}&key=${apiKey}&token=${token}`, {
+        method: "POST",
+    })
+        .then((response) => {
+            setCheckItems([...checkItems, response.data]);
+            let new_value = progressInfo.checked / (progressInfo.length + 1);
+            new_value *= 100;
+            setProgressInfo({ ...progressInfo, length: progressInfo.length + 1, value: new_value });
+        })
+        .catch((error) => {
+            console.log(error);
+        });
+}
+
+function deleteChecklist(checklist, setChecklists, checklists) {
+    axios(`https://api.trello.com/1/checklists/${checklist.id}?key=${apiKey}&token=${token}`, {
+        method: "Delete",
+    }).then((response) => {
+        setChecklists(() => {
+            return checklists.filter((item) => {
+                return item.id != checklist.id;
+            });
+        });
+    });
+}
 export default CardChecklist;

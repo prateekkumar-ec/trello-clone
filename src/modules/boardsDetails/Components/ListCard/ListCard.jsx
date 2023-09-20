@@ -22,20 +22,8 @@ import config from "../../../../../config";
 
 const apiKey = config.apiKey;
 const token = config.token;
-function ListCard({ card, getCards }) {
+function ListCard({ card, cards, setCards }) {
     const { isOpen, onOpen, onClose } = useDisclosure();
-
-    function deleteCard() {
-        axios(`https://api.trello.com/1/cards/${card.id}?key=${apiKey}&token=${token}`, {
-            method: "DELETE",
-        })
-            .then((response) => {
-                getCards();
-            })
-            .catch((error) => {
-                console.log(error);
-            });
-    }
 
     return (
         <>
@@ -47,7 +35,7 @@ function ListCard({ card, getCards }) {
                     <Menu>
                         <MenuButton background={"#282E3"} as={Button} rightIcon={<EditIcon color={"#818B95"} />}></MenuButton>
                         <MenuList background={"#282E33"}>
-                            <MenuItem onClick={deleteCard} background={"none"}>
+                            <MenuItem onClick={() => deleteCard(card, cards, setCards)} background={"none"}>
                                 Delete
                             </MenuItem>
                         </MenuList>
@@ -57,10 +45,10 @@ function ListCard({ card, getCards }) {
 
             <Modal isOpen={isOpen} onClose={onClose} size={"3xl"}>
                 <ModalOverlay />
-                <ModalContent background={"#323940"}>
-                    <ModalHeader color={"white"}>{card.name}</ModalHeader>
-                    <ModalCloseButton color={"white"} />
-                    <ModalBody color={"white"}>
+                <ModalContent background={"#323940"} color={"#B6C2CF"}>
+                    <ModalHeader>{card.name}</ModalHeader>
+                    <ModalCloseButton />
+                    <ModalBody>
                         <CardDetails card={card} />
                     </ModalBody>
                 </ModalContent>
@@ -68,5 +56,19 @@ function ListCard({ card, getCards }) {
         </>
     );
 }
-
+function deleteCard(card, cards, setCards) {
+    axios(`https://api.trello.com/1/cards/${card.id}?key=${apiKey}&token=${token}`, {
+        method: "DELETE",
+    })
+        .then((response) => {
+            setCards(() => {
+                return cards.filter((item) => {
+                    return item.id != card.id;
+                });
+            });
+        })
+        .catch((error) => {
+            console.log(error);
+        });
+}
 export default ListCard;
