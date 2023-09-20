@@ -2,22 +2,7 @@ import { List, ListItem, ListIcon } from "@chakra-ui/react";
 import { AddIcon } from "@chakra-ui/icons";
 
 import ThreeDots from "../../../../assets/threeDots.svg";
-import {
-    Flex,
-    Editable,
-    EditableInput,
-    EditableTextarea,
-    EditablePreview,
-    Menu,
-    MenuButton,
-    MenuList,
-    MenuItem,
-    MenuItemOption,
-    MenuGroup,
-    MenuOptionGroup,
-    MenuDivider,
-    Button,
-} from "@chakra-ui/react";
+import { Text, Spinner, Flex, Editable, EditableInput, EditableTextarea, EditablePreview, Menu, MenuButton, MenuList, MenuItem } from "@chakra-ui/react";
 
 import "./BoardList.css";
 import axios from "axios";
@@ -28,8 +13,10 @@ import config from "../../../../../config";
 const apiKey = config.apiKey;
 const token = config.token;
 
-function BoardList({ list, getBoardLists }) {
+function BoardList({ list, boardLists, setBoardLists }) {
     const [cards, setCards] = useState([]);
+    const [isCardsLoaded, setIsCardsLoaded] = useState(false);
+    const [isError, setIsError] = useState(false);
 
     useEffect(() => {
         getCards();
@@ -44,6 +31,7 @@ function BoardList({ list, getBoardLists }) {
         })
             .then((response) => {
                 setCards(response.data);
+                setIsCardsLoaded(true);
             })
             .catch((error) => {
                 console.log(error);
@@ -56,11 +44,14 @@ function BoardList({ list, getBoardLists }) {
         })
             .then((response) => {
                 if (response.status == 200) {
-                    getBoardLists();
+                    setBoardLists(() => {
+                        return boardLists.filter((boardList) => {
+                            return boardList.id != list.id;
+                        });
+                    });
                 }
             })
             .catch((err) => console.error(err));
-        // console.log(list.id);
     }
 
     function createNewCard(event) {
@@ -77,7 +68,7 @@ function BoardList({ list, getBoardLists }) {
             },
         })
             .then((response) => {
-                getCards();
+                setCards([...cards, response.data]);
             })
             .catch((error) => {
                 console.log(error);
@@ -106,13 +97,23 @@ function BoardList({ list, getBoardLists }) {
                     </Flex>
                 </ListItem>
 
-                {cards.map((card) => {
-                    return (
-                        <ListItem key={card.id}>
-                            <ListCard card={card} getCards={getCards}></ListCard>
-                        </ListItem>
-                    );
-                })}
+                {isCardsLoaded ? (
+                    cards.map((card) => {
+                        return (
+                            <ListItem key={card.id}>
+                                <ListCard card={card} getCards={getCards}></ListCard>
+                            </ListItem>
+                        );
+                    })
+                ) : isError ? (
+                    <Text color={"red"} fontSize={"15px"}>
+                        Error ! Cards can't be loaded.
+                    </Text>
+                ) : (
+                    <Flex justify={"center"}>
+                        <Spinner></Spinner>
+                    </Flex>
+                )}
                 <ListItem>
                     <Flex marginTop={"1rem"} gap={"1rem"} alignItems={"center"}>
                         <AddIcon />

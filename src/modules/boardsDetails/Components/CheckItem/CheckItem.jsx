@@ -1,22 +1,29 @@
 import { Checkbox, Flex, Menu, MenuButton, MenuList, MenuItem } from "@chakra-ui/react";
 import ThreeDots from "../../../../assets/threeDots.svg";
 import axios from "axios";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import config from "../../../../../config";
 const { apiKey, token } = config;
 
 function CheckItem({ card, checklist, checkItem, progressInfo, setProgressInfo, getCheckItems }) {
-    const [isChecked, setIsChecked] = useState();
+    const [checked, setChecked] = useState(false);
+    useEffect(() => {
+        if (checkItem.state == "complete") {
+            setChecked(true);
+        } else {
+            setChecked(false);
+        }
+    }, []);
 
     function handleCheckbox(event) {
         if (event.target.checked == true) {
-            setIsChecked(true);
+            setChecked(true);
             let newProgress = (progressInfo.checked + 1) / progressInfo.length;
             newProgress *= 100;
             setProgressInfo({ ...progressInfo, value: newProgress, checked: progressInfo.checked + 1 });
             updateCheckItemState("complete");
         } else {
-            setIsChecked(false);
+            setChecked(false);
             let newProgress = (progressInfo.checked - 1) / progressInfo.length;
             newProgress *= 100;
             setProgressInfo({ ...progressInfo, value: newProgress, checked: progressInfo.checked - 1 });
@@ -47,7 +54,7 @@ function CheckItem({ card, checklist, checkItem, progressInfo, setProgressInfo, 
 
     return (
         <Flex justify={"space-between"}>
-            <Checkbox onChange={handleCheckbox} colorScheme="green" marginLeft={"1rem"} textDecoration={isChecked ? "line-through" : ""}>
+            <Checkbox onChange={handleCheckbox} colorScheme="green" marginLeft={"1rem"} textDecoration={checked ? "line-through" : ""} isChecked={checked}>
                 {checkItem.name}
             </Checkbox>
             <Menu>

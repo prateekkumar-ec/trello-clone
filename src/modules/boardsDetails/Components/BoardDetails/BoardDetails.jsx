@@ -1,7 +1,7 @@
 import { useParams } from "react-router-dom";
 import BoardList from "../BoardList/BoardList";
 import { useEffect, useState } from "react";
-import { Flex, Container, Editable, EditableInput, EditableTextarea, EditablePreview, List } from "@chakra-ui/react";
+import { Flex, Spinner, Editable, EditableInput, EditableTextarea, EditablePreview, List } from "@chakra-ui/react";
 import { AddIcon } from "@chakra-ui/icons";
 
 import "./BoardDetails.css";
@@ -16,6 +16,7 @@ function BoardDetails() {
     const [boardLists, setBoardLists] = useState();
     const [boardImage, setBoardImage] = useState();
     const [isListsLoaded, setIsListsLoaded] = useState(false);
+    const [isError, setIsError] = useState(false);
 
     useEffect(() => {
         getBoardLists();
@@ -31,6 +32,7 @@ function BoardDetails() {
                 setIsListsLoaded(true);
             })
             .catch((error) => {
+                setIsError(true);
                 console.log(error);
             });
     }
@@ -52,6 +54,9 @@ function BoardDetails() {
     }
 
     function createNewList(event) {
+        if (event == "") {
+            return;
+        }
         axios(
             `https://api.trello.com/1/lists?name=${event}&idBoard=${id}&key=4eec852d0aa570f6b51d0e9a2a58356e&token=ATTA4e4e36552ff74519e3fbed4812cdbd67a2aea1d95f113ef01ed800d6408e03b6A8776DBB`,
             {
@@ -59,7 +64,7 @@ function BoardDetails() {
             }
         )
             .then((response) => {
-                getBoardLists();
+                setBoardLists([...boardLists, response.data]);
             })
             .catch((err) => console.error(err));
     }
@@ -70,13 +75,13 @@ function BoardDetails() {
                 <div className="board-bg-container" style={{ background: boardImage }}>
                     <div className={"board-lists-flex"}>
                         {boardLists.map((list) => {
-                            return <BoardList key={list.id} list={list} getBoardLists={getBoardLists}></BoardList>;
+                            return <BoardList key={list.id} list={list} boardLists={boardLists} setBoardLists={setBoardLists}></BoardList>;
                         })}
                         <div className="board-list">
                             <List background="#485F6C" color="#172B4D" padding={"1rem"} borderRadius={"7px"}>
                                 <Flex gap={"1rem"} alignItems={"center"}>
                                     <AddIcon />
-                                    <Editable onSubmit={createNewList} placeholder={"Add another list"} defaultValue="">
+                                    <Editable onSubmit={createNewList} submitOnBlur={false} placeholder={"Add another list"}>
                                         <EditablePreview cursor={"pointer"} />
                                         <EditableInput />
                                     </Editable>
@@ -85,6 +90,14 @@ function BoardDetails() {
                         </div>
                     </div>
                 </div>
+            </>
+        );
+    } else if (isListsLoaded == false) {
+        return (
+            <>
+                <Flex className={"boards-flex"} width="60%" margin="auto" gap="1.5rem" marginTop={"15rem"} justify={"center"}>
+                    {isError ? <Text color={"white"}>Error</Text> : <Spinner color="white"></Spinner>}
+                </Flex>
             </>
         );
     }

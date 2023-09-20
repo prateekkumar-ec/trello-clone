@@ -9,3 +9,6 @@
 .form-fields {
     gap: 1rem;
 }
+.create-board-button:hover {
+    background: rgb(225, 243, 250) !important;
+}

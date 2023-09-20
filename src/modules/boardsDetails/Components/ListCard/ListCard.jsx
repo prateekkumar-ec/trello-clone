@@ -7,21 +7,12 @@ import {
     MenuButton,
     MenuList,
     MenuItem,
-    MenuItemOption,
-    MenuGroup,
-    MenuOptionGroup,
-    MenuDivider,
     ModalHeader,
-    ModalFooter,
     ModalBody,
     ModalCloseButton,
     Button,
     useDisclosure,
     Flex,
-    List,
-    Editable,
-    EditablePreview,
-    EditableInput,
 } from "@chakra-ui/react";
 import { EditIcon, CheckIcon, AddIcon } from "@chakra-ui/icons";
 import axios from "axios";
@@ -66,12 +57,10 @@ function ListCard({ card, getCards }) {
 
             <Modal isOpen={isOpen} onClose={onClose} size={"3xl"}>
                 <ModalOverlay />
-                <ModalContent>
-                    <ModalHeader background={"#323940"} color={"white"}>
-                        {card.name}
-                    </ModalHeader>
+                <ModalContent background={"#323940"}>
+                    <ModalHeader color={"white"}>{card.name}</ModalHeader>
                     <ModalCloseButton color={"white"} />
-                    <ModalBody background={"#323940"} color={"white"}>
+                    <ModalBody color={"white"}>
                         <CardDetails card={card} />
                     </ModalBody>
                 </ModalContent>

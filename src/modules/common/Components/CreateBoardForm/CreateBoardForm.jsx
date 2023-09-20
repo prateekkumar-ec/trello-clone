@@ -6,7 +6,7 @@ import config from "../../../../../config";
 
 const apiKey = config.apiKey;
 const token = config.token;
-function CreateBoardForm({ getBoards }) {
+function CreateBoardForm({ boards, setBoards }) {
     const [isCreateDisable, setIsCreateDisable] = useState(true);
     const [newBoardName, setNewBoardName] = useState("");
     function handleBordTitleInput(event) {
@@ -18,14 +18,11 @@ function CreateBoardForm({ getBoards }) {
         }
     }
     function createBoard() {
-        axios(`https://api.trello.com/1/boards/?name=${newBoardName}&key=${apiKey}}&token=${token}`, {
+        axios(`https://api.trello.com/1/boards/?name=${newBoardName}&key=${apiKey}&token=${token}`, {
             method: "POST",
         })
             .then((response) => {
-                return response;
-            })
-            .then((data) => {
-                getBoards(`https://api.trello.com/1/members/me/boards?key=${apiKey}&token=${token}`);
+                setBoards([...boards, response.data]);
             })
             .catch((err) => console.error(err));
     }
@@ -35,7 +32,7 @@ function CreateBoardForm({ getBoards }) {
                 <FormLabel>Board Title</FormLabel>
                 <Input onChange={handleBordTitleInput} id="boardName"></Input>
             </FormControl>
-            <Button color={"green"} isDisabled={isCreateDisable} variant="outline" onClick={createBoard}>
+            <Button className="create-board-button" color={"#1D2125"} background={"#85B8FF"} isDisabled={isCreateDisable} variant="outline" onClick={createBoard}>
                 Create
             </Button>
         </Stack>

@@ -78,7 +78,8 @@ function CardDetails({ card }) {
             },
         })
             .then((response) => {
-                getChecklists();
+                setChecklists([...checklists, response.data]);
+                setIsChecklistLoaded(true);
             })
             .catch((error) => {
                 console.log(error);

@@ -35,7 +35,21 @@ function CardChecklist({ checklist, getChecklists, card }) {
         axios(`https://api.trello.com/1/checklists/${checklist.id}/checkItems?key=${apiKey}&token=${token}`, { method: "GET" })
             .then((response) => {
                 setCheckItems(response.data);
-                setProgressInfo({ ...progressInfo, length: response.data.length });
+                setProgressInfo(() => {
+                    if (response.data.length == 0) {
+                        return progressInfo;
+                    }
+                    let new_checked = 0;
+                    for (let item of response.data) {
+                        if (item.state == "complete") {
+                            new_checked++;
+                        }
+                    }
+                    let newProgress = new_checked / response.data.length;
+                    newProgress *= 100;
+
+                    return { length: response.data.length, value: newProgress, checked: new_checked };
+                });
                 setIsCheckItemsLoaded(true);
             })
             .catch((error) => {
@@ -58,7 +72,6 @@ function CardChecklist({ checklist, getChecklists, card }) {
             method: "POST",
         })
             .then((response) => {
-                console.log(response);
                 getCheckItems();
             })
             .catch((error) => {

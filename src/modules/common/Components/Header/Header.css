@@ -1,3 +1,6 @@
+.header {
+    border-bottom: 1px solid #b6c2cf;
+}
 .left-bar {
     display: flex;
 }
@@ -11,4 +14,8 @@
     background: #edf2f7;
     color: black;
     padding: 0 1.5rem;
+}
+.branding {
+    height: 20px;
+    width: 100px;
 }
