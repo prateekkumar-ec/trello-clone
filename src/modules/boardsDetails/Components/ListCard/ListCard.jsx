@@ -13,6 +13,7 @@ import {
     Button,
     useDisclosure,
     Flex,
+    useToast,
 } from "@chakra-ui/react";
 import { EditIcon, CheckIcon, AddIcon } from "@chakra-ui/icons";
 import axios from "axios";
@@ -24,6 +25,7 @@ const apiKey = config.apiKey;
 const token = config.token;
 function ListCard({ card, cards, setCards }) {
     const { isOpen, onOpen, onClose } = useDisclosure();
+    const toast = useToast();
 
     return (
         <>
@@ -35,7 +37,7 @@ function ListCard({ card, cards, setCards }) {
                     <Menu>
                         <MenuButton background={"#282E3"} as={Button} rightIcon={<EditIcon color={"#818B95"} />}></MenuButton>
                         <MenuList background={"#282E33"}>
-                            <MenuItem onClick={() => deleteCard(card, cards, setCards)} background={"none"}>
+                            <MenuItem onClick={() => deleteCard(card, cards, setCards, toast)} background={"none"}>
                                 Delete
                             </MenuItem>
                         </MenuList>
@@ -56,7 +58,7 @@ function ListCard({ card, cards, setCards }) {
         </>
     );
 }
-function deleteCard(card, cards, setCards) {
+function deleteCard(card, cards, setCards, toast) {
     axios(`https://api.trello.com/1/cards/${card.id}?key=${apiKey}&token=${token}`, {
         method: "DELETE",
     })
@@ -66,9 +68,22 @@ function deleteCard(card, cards, setCards) {
                     return item.id != card.id;
                 });
             });
+            toast({
+                title: " Deleted!",
+                description: "Your card is deleted successfully.",
+                status: "info",
+                duration: 9000,
+                isClosable: true,
+            });
         })
         .catch((error) => {
-            console.log(error);
+            toast({
+                title: " Failed to delete!",
+                description: "Try checking your network.",
+                status: "error",
+                duration: 9000,
+                isClosable: true,
+            });
         });
 }
 export default ListCard;

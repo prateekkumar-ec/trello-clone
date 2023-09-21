@@ -1,4 +1,4 @@
-import { FormControl, Input, Button, Flex, Stack, FormLabel } from "@chakra-ui/react";
+import { useToast, FormControl, Input, Button, Flex, Stack, FormLabel } from "@chakra-ui/react";
 import { useState } from "react";
 import axios from "axios";
 import "./CreateBoardForm.css";
@@ -9,6 +9,9 @@ const token = config.token;
 function CreateBoardForm({ boards, setBoards }) {
     const [isCreateDisable, setIsCreateDisable] = useState(true);
     const [newBoardName, setNewBoardName] = useState("");
+
+    const toast = useToast();
+
     function handleBordTitleInput(event) {
         if (event.target.value != "") {
             setIsCreateDisable(false);
@@ -23,14 +26,30 @@ function CreateBoardForm({ boards, setBoards }) {
         })
             .then((response) => {
                 setBoards([...boards, response.data]);
+                toast({
+                    title: " Created!",
+                    description: "A new Board is created successfully.",
+                    status: "success",
+                    duration: 9000,
+                    isClosable: true,
+                });
             })
-            .catch((err) => console.error(err));
+            .catch((err) => {
+                toast({
+                    title: "Failed to create board.",
+                    description: "Try checking your network.",
+                    status: "error",
+                    duration: 9000,
+                    isClosable: true,
+                });
+                console.error(err);
+            });
     }
     return (
         <Stack spacing={4}>
             <FormControl>
                 <FormLabel>Board Title</FormLabel>
-                <Input onChange={handleBordTitleInput} id="boardName"></Input>
+                <Input onKeyDown={handleBordTitleInput} id="boardName"></Input>
             </FormControl>
             <Button className="create-board-button" color={"#1D2125"} background={"#85B8FF"} isDisabled={isCreateDisable} variant="outline" onClick={createBoard}>
                 Create

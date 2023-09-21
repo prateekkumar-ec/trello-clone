@@ -1,4 +1,4 @@
-import { Checkbox, Flex, Menu, MenuButton, MenuList, MenuItem } from "@chakra-ui/react";
+import { useToast, Checkbox, Flex, Menu, MenuButton, MenuList, MenuItem } from "@chakra-ui/react";
 import ThreeDots from "../../../../assets/threeDots.svg";
 import axios from "axios";
 import { useEffect, useState } from "react";
@@ -7,6 +7,7 @@ const { apiKey, token } = config;
 
 function CheckItem({ card, checklist, checkItem, progressInfo, setProgressInfo, checkItems, setCheckItems }) {
     const [checked, setChecked] = useState(false);
+    const toast = useToast();
     useEffect(() => {
         if (checkItem.state == "complete") {
             setChecked(true);
@@ -33,33 +34,48 @@ function CheckItem({ card, checklist, checkItem, progressInfo, setProgressInfo, 
     function deleteCheckItem() {
         axios(`https://api.trello.com/1/checklists/${checklist.id}/checkItems/${checkItem.id}?key=${apiKey}&token=${token}`, {
             method: "Delete",
-        }).then((reponse) => {
-            setCheckItems(() => {
-                return checkItems.filter((item) => {
-                    return item.id != checkItem.id;
+        })
+            .then((reponse) => {
+                setCheckItems(() => {
+                    return checkItems.filter((item) => {
+                        return item.id != checkItem.id;
+                    });
+                });
+                let new_value;
+                if (checked) {
+                    if (progressInfo.length - 1 == 0) {
+                        setProgressInfo({ checked: 0, length: 0, value: 0 });
+                    } else {
+                        new_value = (progressInfo.checked - 1) / (progressInfo.length - 1);
+                        new_value *= 100;
+                        setProgressInfo({ checked: progressInfo.checked - 1, length: progressInfo.length - 1, value: new_value });
+                    }
+                } else {
+                    if (progressInfo.length - 1 == 0) {
+                        setProgressInfo({ checked: 0, length: 0, value: 0 });
+                    } else {
+                        new_value = progressInfo.checked / (progressInfo.length - 1);
+                        new_value *= 100;
+                        setProgressInfo({ ...progressInfo, length: progressInfo.length - 1, value: new_value });
+                    }
+                }
+                toast({
+                    title: " Deleted!",
+                    description: "Your card is deleted successfully.",
+                    status: "info",
+                    duration: 9000,
+                    isClosable: true,
+                });
+            })
+            .catch((error) => {
+                toast({
+                    title: " Failed to delete!",
+                    description: "Try checking your network.",
+                    status: "error",
+                    duration: 9000,
+                    isClosable: true,
                 });
             });
-            let new_value;
-            if (checked) {
-                console.log("complete");
-                if (progressInfo - 1 == 0) {
-                    setProgressInfo({ checked: 0, length: 0, value: 0 });
-                } else {
-                    new_value = (progressInfo.checked - 1) / (progressInfo.length - 1);
-                    new_value *= 100;
-                    setProgressInfo({ checked: progressInfo.checked - 1, length: progressInfo.length - 1, value: new_value });
-                }
-            } else {
-                console.log("incomplete");
-                if (progressInfo - 1 == 0) {
-                    setProgressInfo({ checked: 0, length: 0, value: 0 });
-                } else {
-                    new_value = progressInfo.checked / (progressInfo.length - 1);
-                    new_value *= 100;
-                    setProgressInfo({ ...progressInfo, length: progressInfo.length - 1, value: new_value });
-                }
-            }
-        });
     }
 
     function updateCheckItemState(stateValue) {

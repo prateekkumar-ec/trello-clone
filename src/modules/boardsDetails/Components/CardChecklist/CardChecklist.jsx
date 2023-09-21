@@ -12,6 +12,7 @@ import {
     PopoverBody,
     PopoverCloseButton,
     Progress,
+    useToast,
 } from "@chakra-ui/react";
 import { EditIcon, CheckIcon, AddIcon } from "@chakra-ui/icons";
 import axios from "axios";
@@ -26,6 +27,7 @@ function CardChecklist({ checklist, setChecklists, checklists, card }) {
     const [checkItems, setCheckItems] = useState([]);
     const [isCheckItemsLoaded, setIsCheckItemsLoaded] = useState(false);
     const [progressInfo, setProgressInfo] = useState({ value: 0, checked: 0, length: 0 });
+    const toast = useToast();
 
     useEffect(() => {
         getCheckItems(checklist, setCheckItems, setProgressInfo, progressInfo, setIsCheckItemsLoaded);
@@ -82,7 +84,7 @@ function CardChecklist({ checklist, setChecklists, checklists, card }) {
                         <Flex marginLeft={"1rem"} gap={"1rem"} alignItems={"center"} background={"#3B444C"} padding={"0.3rem 1rem"} borderRadius={"7px"}>
                             <AddIcon />
                             <Editable
-                                onSubmit={(event) => createCheckItem(event, checklist, checkItems, setCheckItems, progressInfo, setProgressInfo)}
+                                onSubmit={(event) => createCheckItem(event, checklist, checkItems, setCheckItems, progressInfo, setProgressInfo, toast)}
                                 placeholder={"Add an item"}
                                 defaultValue=""
                             >
@@ -123,7 +125,7 @@ function getCheckItems(checklist, setCheckItems, setProgressInfo, progressInfo, 
         });
 }
 
-function createCheckItem(name, checklist, checkItems, setCheckItems, progressInfo, setProgressInfo) {
+function createCheckItem(name, checklist, checkItems, setCheckItems, progressInfo, setProgressInfo, toast) {
     if (name == "") {
         return;
     }
@@ -135,9 +137,22 @@ function createCheckItem(name, checklist, checkItems, setCheckItems, progressInf
             let new_value = progressInfo.checked / (progressInfo.length + 1);
             new_value *= 100;
             setProgressInfo({ ...progressInfo, length: progressInfo.length + 1, value: new_value });
+            toast({
+                title: " Created!",
+                description: "A new check item is created successfully.",
+                status: "success",
+                duration: 9000,
+                isClosable: true,
+            });
         })
         .catch((error) => {
-            console.log(error);
+            toast({
+                title: "Failed to create card.",
+                description: "Try checking your network.",
+                status: "error",
+                duration: 9000,
+                isClosable: true,
+            });
         });
 }
 

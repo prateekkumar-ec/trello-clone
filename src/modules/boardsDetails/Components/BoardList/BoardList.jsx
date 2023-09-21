@@ -2,7 +2,7 @@ import { List, ListItem, ListIcon } from "@chakra-ui/react";
 import { AddIcon } from "@chakra-ui/icons";
 
 import ThreeDots from "../../../../assets/threeDots.svg";
-import { Text, Spinner, Flex, Editable, EditableInput, EditableTextarea, EditablePreview, Menu, MenuButton, MenuList, MenuItem } from "@chakra-ui/react";
+import { useToast, Text, Spinner, Flex, Editable, EditableInput, EditableTextarea, EditablePreview, Menu, MenuButton, MenuList, MenuItem } from "@chakra-ui/react";
 
 import "./BoardList.css";
 import axios from "axios";
@@ -17,6 +17,7 @@ function BoardList({ list, boardLists, setBoardLists }) {
     const [cards, setCards] = useState([]);
     const [isCardsLoaded, setIsCardsLoaded] = useState(false);
     const [isError, setIsError] = useState(false);
+    const toast = useToast();
 
     useEffect(() => {
         getCards(list, setCards, setIsCardsLoaded, setIsError);
@@ -64,7 +65,7 @@ function BoardList({ list, boardLists, setBoardLists }) {
                 <ListItem>
                     <Flex marginTop={"1rem"} gap={"1rem"} alignItems={"center"}>
                         <AddIcon />
-                        <Editable onSubmit={(event) => createNewCard(event, list, cards, setCards)} placeholder={"Add a card"} defaultValue="">
+                        <Editable onSubmit={(event) => createNewCard(event, list, cards, setCards, toast)} placeholder={"Add a card"} defaultValue="">
                             <EditablePreview cursor={"pointer"} />
                             <EditableInput />
                         </Editable>
@@ -108,7 +109,7 @@ function archiveList(list, setBoardLists, boardLists) {
         .catch((err) => console.error(err));
 }
 
-function createNewCard(event, list, cards, setCards) {
+function createNewCard(event, list, cards, setCards, toast) {
     if (event == "") {
         return;
     }
@@ -123,9 +124,22 @@ function createNewCard(event, list, cards, setCards) {
     })
         .then((response) => {
             setCards([...cards, response.data]);
+            toast({
+                title: " Created!",
+                description: "A new card is created successfully.",
+                status: "success",
+                duration: 9000,
+                isClosable: true,
+            });
         })
         .catch((error) => {
-            console.log(error);
+            toast({
+                title: "Failed to create card.",
+                description: "Try checking your network.",
+                status: "error",
+                duration: 9000,
+                isClosable: true,
+            });
         });
 }
 export default BoardList;

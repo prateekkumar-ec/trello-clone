@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import { Flex, Spinner, Editable, EditableInput, Text, EditablePreview, List } from "@chakra-ui/react";
+import { Flex, Spinner, useToast, Editable, EditableInput, Text, EditablePreview, List } from "@chakra-ui/react";
 
 import BoardList from "../BoardList/BoardList";
 import { AddIcon } from "@chakra-ui/icons";
@@ -11,7 +11,10 @@ const apiKey = config.apiKey;
 const token = config.token;
 
 import axios from "axios";
+
 function BoardDetails() {
+    const toast = useToast();
+
     const { id } = useParams();
     const [boardLists, setBoardLists] = useState();
     const [boardImage, setBoardImage] = useState();
@@ -35,7 +38,11 @@ function BoardDetails() {
                             <List background="#485F6C" color="#172B4D" padding={"1rem"} borderRadius={"7px"}>
                                 <Flex gap={"1rem"} alignItems={"center"}>
                                     <AddIcon />
-                                    <Editable onSubmit={(event) => createNewList(event, id, setBoardLists, boardLists)} submitOnBlur={false} placeholder={"Add another list"}>
+                                    <Editable
+                                        onSubmit={(event) => createNewList(event, id, setBoardLists, boardLists, toast)}
+                                        submitOnBlur={false}
+                                        placeholder={"Add another list"}
+                                    >
                                         <EditablePreview cursor={"pointer"} />
                                         <EditableInput />
                                     </Editable>
@@ -88,7 +95,7 @@ function getBoardImage(id, setBoardImage) {
         });
 }
 
-function createNewList(event, id, setBoardLists, boardLists) {
+function createNewList(event, id, setBoardLists, boardLists, toast) {
     if (event == "") {
         return;
     }
@@ -100,7 +107,24 @@ function createNewList(event, id, setBoardLists, boardLists) {
     )
         .then((response) => {
             setBoardLists([...boardLists, response.data]);
+            console.log("YEs");
+            toast({
+                title: " Created!",
+                description: "A new list is created successfully.",
+                status: "success",
+                duration: 9000,
+                isClosable: true,
+            });
         })
-        .catch((err) => console.error(err));
+        .catch((err) => {
+            toast({
+                title: "Failed to create list.",
+                description: "Try checking your network.",
+                status: "error",
+                duration: 9000,
+                isClosable: true,
+            });
+            console.error(err);
+        });
 }
 export default BoardDetails;

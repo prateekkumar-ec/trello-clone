@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Flex, Box, Text, Spinner, Popover, PopoverTrigger, PopoverContent, PopoverHeader, PopoverBody, PopoverCloseButton } from "@chakra-ui/react";
+import { useToast, Flex, Box, Text, Spinner, Popover, PopoverTrigger, PopoverContent, PopoverHeader, PopoverBody, PopoverCloseButton } from "@chakra-ui/react";
 import axios from "axios";
 
 import CreateBoardForm from "../../../common/Components/CreateBoardForm/CreateBoardForm";
@@ -15,6 +15,7 @@ function Boards() {
     const [boards, setBoards] = useState([]);
     const [isLoaded, setIsLoaded] = useState(false);
     const [isError, setIsError] = useState(false);
+    const toast = useToast();
 
     useEffect(() => {
         getBoards(setBoards, setIsLoaded, setIsError);
@@ -39,7 +40,7 @@ function Boards() {
         return (
             <>
                 <Flex className={"boards-flex"} width="60%" margin="auto" gap="1.5rem" marginTop={"15rem"} justify={"center"}>
-                    {isError ? <Text color={"white"}>Error</Text> : <Spinner color="white"></Spinner>}
+                    {isError ? <Text color={"white"}>{isError.message}</Text> : <Spinner color="white"></Spinner>}
                 </Flex>
             </>
         );
@@ -56,7 +57,7 @@ function getBoards(setBoards, setIsLoaded, setIsError) {
             }
         })
         .catch((error) => {
-            setIsError(true);
+            setIsError(error);
         });
 }
 function CreateNewBoard({ setBoards, boards }) {
