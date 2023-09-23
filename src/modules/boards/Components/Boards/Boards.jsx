@@ -21,9 +21,14 @@ function Boards() {
     }, []);
 
     function getBoards() {
+        console.log(`https://api.trello.com/1/members/me/boards?key=${apiKey}&token=${token}`);
+        console.log(apiKey);
+        console.log(token);
         axios
             .get(`https://api.trello.com/1/members/me/boards?key=${apiKey}&token=${token}`)
             .then((res) => {
+                console.log(res);
+                console.log(res.data);
                 if (res.status == 200) {
                     dispatchBoards({
                         type: "get",
