@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useReducer } from "react";
 import { useToast, Flex, Box, Text, Spinner, Popover, PopoverTrigger, PopoverContent, PopoverHeader, PopoverBody, PopoverCloseButton } from "@chakra-ui/react";
 import axios from "axios";
 
@@ -12,55 +12,59 @@ const apiKey = config.apiKey;
 const token = config.token;
 
 function Boards() {
-    const [boards, setBoards] = useState([]);
-    const [isLoaded, setIsLoaded] = useState(false);
-    const [isError, setIsError] = useState(false);
+    const [boards, dispatchBoards] = useReducer(boardsReducer, { data: [], isLoaded: false, isError: false });
+
     const toast = useToast();
 
     useEffect(() => {
-        getBoards(setBoards, setIsLoaded, setIsError);
+        getBoards();
     }, []);
 
+    function getBoards() {
+        axios
+            .get(`https://api.trello.com/1/members/me/boards?key=${apiKey}&token=${token}`)
+            .then((res) => {
+                if (res.status == 200) {
+                    dispatchBoards({
+                        type: "get",
+                        data: res.data,
+                    });
+                }
+            })
+            .catch((error) => {
+                dispatchBoards({
+                    type: "error",
+                    error: error,
+                });
+            });
+    }
     function showCreateBoardForm() {
         setIsFormOpen(!isFormOpen);
     }
 
-    if (isLoaded) {
+    if (boards.isLoaded) {
         return (
             <>
                 <Flex className={"boards-flex"} width="60%" margin="auto" gap="1.5rem" marginTop={"2rem"}>
-                    <CreateNewBoard setBoards={setBoards} boards={boards} />
-                    {boards.map((board) => {
+                    <CreateNewBoard dispatchBoards={dispatchBoards} boards={boards} />
+                    {boards.data.map((board) => {
                         return <Board key={board.id} board={board} />;
                     })}
                 </Flex>
             </>
         );
-    } else if (isLoaded == false) {
+    } else {
         return (
             <>
                 <Flex className={"boards-flex"} width="60%" margin="auto" gap="1.5rem" marginTop={"15rem"} justify={"center"}>
-                    {isError ? <Text color={"white"}>{isError.message}</Text> : <Spinner color="white"></Spinner>}
+                    {boards.isError ? <Text color={"white"}>{boards.isError.message}</Text> : <Spinner color="white"></Spinner>}
                 </Flex>
             </>
         );
     }
 }
 
-function getBoards(setBoards, setIsLoaded, setIsError) {
-    axios
-        .get(`https://api.trello.com/1/members/me/boards?key=${apiKey}&token=${token}`)
-        .then((res) => {
-            if (res.status == 200) {
-                setBoards(res.data);
-                setIsLoaded(true);
-            }
-        })
-        .catch((error) => {
-            setIsError(error);
-        });
-}
-function CreateNewBoard({ setBoards, boards }) {
+function CreateNewBoard({ dispatchBoards, boards }) {
     return (
         <Popover offset={[300, -150]}>
             <PopoverTrigger>
@@ -76,10 +80,23 @@ function CreateNewBoard({ setBoards, boards }) {
                 <PopoverCloseButton />
                 <PopoverHeader>Create Board</PopoverHeader>
                 <PopoverBody>
-                    <CreateBoardForm getBoards={getBoards} setBoards={setBoards} boards={boards}></CreateBoardForm>
+                    <CreateBoardForm dispatchBoards={dispatchBoards} boards={boards}></CreateBoardForm>
                 </PopoverBody>
             </PopoverContent>
         </Popover>
     );
+}
+function boardsReducer(boards, action) {
+    switch (action.type) {
+        case "get": {
+            return { ...boards, data: action.data, isLoaded: true };
+        }
+        case "add": {
+            return [...boards, action.data];
+        }
+        case "error": {
+            return { ...boards, isLoaded: false, isError: action.error };
+        }
+    }
 }
 export default Boards;

@@ -7,20 +7,36 @@ import { useToast, Text, Spinner, Flex, Editable, EditableInput, EditableTextare
 import "./BoardList.css";
 import axios from "axios";
 import ListCard from "../ListCard/ListCard";
-import { useEffect, useState } from "react";
+import { useEffect, useReducer, useState } from "react";
 import config from "../../../../../config";
 
 const apiKey = config.apiKey;
 const token = config.token;
 
-function BoardList({ list, boardLists, setBoardLists }) {
-    const [cards, setCards] = useState([]);
-    const [isCardsLoaded, setIsCardsLoaded] = useState(false);
-    const [isError, setIsError] = useState(false);
+function BoardList({ list, dispatchBoardLists }) {
+    const [cards, dispatchCards] = useReducer(cardsReducer, { data: [], isCardsLoaded: false, isError: false });
+
     const toast = useToast();
 
     useEffect(() => {
-        getCards(list, setCards, setIsCardsLoaded, setIsError);
+        axios(`https://api.trello.com/1/lists/${list.id}/cards?key=${apiKey}&token=${token}`, {
+            method: "GET",
+            headers: {
+                Accept: "application/json",
+            },
+        })
+            .then((response) => {
+                dispatchCards({
+                    type: "get",
+                    data: response.data,
+                });
+            })
+            .catch((error) => {
+                dispatchCards({
+                    type: "error",
+                    error: error,
+                });
+            });
     }, []);
 
     return (
@@ -37,7 +53,7 @@ function BoardList({ list, boardLists, setBoardLists }) {
                                 <img src={ThreeDots}></img>
                             </MenuButton>
                             <MenuList bgColor={"#282E33"}>
-                                <MenuItem onClick={() => archiveList(list, setBoardLists, boardLists)} bg={"#282E33"}>
+                                <MenuItem onClick={() => archiveList(list, dispatchBoardLists)} bg={"#282E33"}>
                                     Archive List
                                 </MenuItem>
                             </MenuList>
@@ -45,17 +61,17 @@ function BoardList({ list, boardLists, setBoardLists }) {
                     </Flex>
                 </ListItem>
 
-                {isCardsLoaded ? (
-                    cards.map((card) => {
+                {cards.isCardsLoaded ? (
+                    cards.data.map((card) => {
                         return (
                             <ListItem key={card.id}>
-                                <ListCard card={card} setCards={setCards} cards={cards}></ListCard>
+                                <ListCard card={card} dispatchCards={dispatchCards}></ListCard>
                             </ListItem>
                         );
                     })
-                ) : isError ? (
+                ) : cards.isError ? (
                     <Text color={"red"} fontSize={"15px"}>
-                        Error ! Cards can't be loaded.
+                        {cards.isError.message}
                     </Text>
                 ) : (
                     <Flex justify={"center"}>
@@ -65,7 +81,7 @@ function BoardList({ list, boardLists, setBoardLists }) {
                 <ListItem>
                     <Flex marginTop={"1rem"} gap={"1rem"} alignItems={"center"}>
                         <AddIcon />
-                        <Editable onSubmit={(event) => createNewCard(event, list, cards, setCards, toast)} placeholder={"Add a card"} defaultValue="">
+                        <Editable onSubmit={(event) => createNewCard(event, list, dispatchCards, toast)} placeholder={"Add a card"} defaultValue="">
                             <EditablePreview cursor={"pointer"} />
                             <EditableInput />
                         </Editable>
@@ -76,40 +92,22 @@ function BoardList({ list, boardLists, setBoardLists }) {
     );
 }
 
-function getCards(list, setCards, setIsCardsLoaded, setIsError) {
-    axios(`https://api.trello.com/1/lists/${list.id}/cards?key=${apiKey}&token=${token}`, {
-        method: "GET",
-        headers: {
-            Accept: "application/json",
-        },
-    })
-        .then((response) => {
-            setCards(response.data);
-            setIsCardsLoaded(true);
-        })
-        .catch((error) => {
-            setIsError(true);
-            console.log(error);
-        });
-}
-
-function archiveList(list, setBoardLists, boardLists) {
+function archiveList(list, dispatchBoardLists) {
     axios(`https://api.trello.com/1/lists/${list.id}/?closed=true&&key=${apiKey}&token=${token}`, {
         method: "PUT",
     })
         .then((response) => {
             if (response.status == 200) {
-                setBoardLists(() => {
-                    return boardLists.filter((boardList) => {
-                        return boardList.id != list.id;
-                    });
+                dispatchBoardLists({
+                    type: "delete",
+                    id: list.id,
                 });
             }
         })
         .catch((err) => console.error(err));
 }
 
-function createNewCard(event, list, cards, setCards, toast) {
+function createNewCard(event, list, dispatchCards, toast) {
     if (event == "") {
         return;
     }
@@ -123,7 +121,10 @@ function createNewCard(event, list, cards, setCards, toast) {
         },
     })
         .then((response) => {
-            setCards([...cards, response.data]);
+            dispatchCards({
+                type: "add",
+                data: response.data,
+            });
             toast({
                 title: " Created!",
                 description: "A new card is created successfully.",
@@ -141,5 +142,25 @@ function createNewCard(event, list, cards, setCards, toast) {
                 isClosable: true,
             });
         });
+}
+
+function cardsReducer(cards, action) {
+    switch (action.type) {
+        case "get": {
+            return { ...cards, data: action.data, isCardsLoaded: true };
+        }
+        case "add": {
+            return { ...cards, data: [...cards.data, action.data] };
+        }
+        case "delete": {
+            let new_data = cards.data.filter((item) => {
+                return item.id != action.id;
+            });
+            return { ...cards, data: new_data };
+        }
+        case "error": {
+            return { ...cards, isError: action.error };
+        }
+    }
 }
 export default BoardList;

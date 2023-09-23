@@ -8,6 +8,7 @@ function Board({ board }) {
     let { backgroundColor, backgroundImageScaled } = board.prefs;
     const [displayStar, setDisplayStar] = useState("");
     const { id } = board;
+
     function toggleStar() {
         if (displayStar == "star") {
             setDisplayStar("");
@@ -22,7 +23,7 @@ function Board({ board }) {
                 onMouseEnter={toggleStar}
                 onMouseLeave={toggleStar}
                 className={"board"}
-                style={{ background: "url(" + backgroundImageScaled[2].url + ")", backgroundSize: "100% 100%" }}
+                style={{ background: "url(" + backgroundImageScaled[3].url + ")", backgroundSize: "cover", backgroundPosition: "50%" }}
             >
                 <BoardContent board={board} displayStar={displayStar}></BoardContent>
             </div>
@@ -38,7 +39,7 @@ function Board({ board }) {
 
 function BoardContent({ board, displayStar }) {
     return (
-        <Link to={"/boards/" + board.id}>
+        <Link to={`/boards/${board.name}/${board.id}`}>
             <div className="board-details">
                 <div className="board-details-name">
                     <div>{board.name}</div>

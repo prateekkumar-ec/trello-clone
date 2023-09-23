@@ -23,7 +23,7 @@ import config from "../../../../../config";
 
 const apiKey = config.apiKey;
 const token = config.token;
-function ListCard({ card, cards, setCards }) {
+function ListCard({ card, dispatchCards }) {
     const { isOpen, onOpen, onClose } = useDisclosure();
     const toast = useToast();
 
@@ -37,7 +37,7 @@ function ListCard({ card, cards, setCards }) {
                     <Menu>
                         <MenuButton background={"#282E3"} as={Button} rightIcon={<EditIcon color={"#818B95"} />}></MenuButton>
                         <MenuList background={"#282E33"}>
-                            <MenuItem onClick={() => deleteCard(card, cards, setCards, toast)} background={"none"}>
+                            <MenuItem onClick={() => deleteCard(card, dispatchCards, toast)} background={"none"}>
                                 Delete
                             </MenuItem>
                         </MenuList>
@@ -48,7 +48,7 @@ function ListCard({ card, cards, setCards }) {
             <Modal isOpen={isOpen} onClose={onClose} size={"3xl"}>
                 <ModalOverlay />
                 <ModalContent background={"#323940"} color={"#B6C2CF"}>
-                    <ModalHeader>{card.name}</ModalHeader>
+                    <ModalHeader className="card-header">{card.name}</ModalHeader>
                     <ModalCloseButton />
                     <ModalBody>
                         <CardDetails card={card} />
@@ -58,15 +58,14 @@ function ListCard({ card, cards, setCards }) {
         </>
     );
 }
-function deleteCard(card, cards, setCards, toast) {
+function deleteCard(card, dispatchCards, toast) {
     axios(`https://api.trello.com/1/cards/${card.id}?key=${apiKey}&token=${token}`, {
         method: "DELETE",
     })
         .then((response) => {
-            setCards(() => {
-                return cards.filter((item) => {
-                    return item.id != card.id;
-                });
+            dispatchCards({
+                type: "delete",
+                id: card.id,
             });
             toast({
                 title: " Deleted!",

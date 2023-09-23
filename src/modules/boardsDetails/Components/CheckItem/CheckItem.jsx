@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 import config from "../../../../../config";
 const { apiKey, token } = config;
 
-function CheckItem({ card, checklist, checkItem, progressInfo, setProgressInfo, checkItems, setCheckItems }) {
+function CheckItem({ card, checklist, checkItem, dispatchCheckItems, dispatchProgressInfo, checkItems, setCheckItems }) {
     const [checked, setChecked] = useState(false);
     const toast = useToast();
     useEffect(() => {
@@ -19,15 +19,17 @@ function CheckItem({ card, checklist, checkItem, progressInfo, setProgressInfo, 
     function handleCheckbox(event) {
         if (event.target.checked == true) {
             setChecked(true);
-            let newProgress = (progressInfo.checked + 1) / progressInfo.length;
-            newProgress *= 100;
-            setProgressInfo({ ...progressInfo, value: newProgress, checked: progressInfo.checked + 1 });
+            dispatchProgressInfo({
+                type: "increment",
+            });
+
             updateCheckItemState("complete");
         } else {
             setChecked(false);
-            let newProgress = (progressInfo.checked - 1) / progressInfo.length;
-            newProgress *= 100;
-            setProgressInfo({ ...progressInfo, value: newProgress, checked: progressInfo.checked - 1 });
+            dispatchProgressInfo({
+                type: "decrement",
+            });
+
             updateCheckItemState("incomplete");
         }
     }
@@ -36,29 +38,15 @@ function CheckItem({ card, checklist, checkItem, progressInfo, setProgressInfo, 
             method: "Delete",
         })
             .then((reponse) => {
-                setCheckItems(() => {
-                    return checkItems.filter((item) => {
-                        return item.id != checkItem.id;
-                    });
+                dispatchCheckItems({
+                    type: "delete",
+                    id: checkItem.id,
                 });
-                let new_value;
-                if (checked) {
-                    if (progressInfo.length - 1 == 0) {
-                        setProgressInfo({ checked: 0, length: 0, value: 0 });
-                    } else {
-                        new_value = (progressInfo.checked - 1) / (progressInfo.length - 1);
-                        new_value *= 100;
-                        setProgressInfo({ checked: progressInfo.checked - 1, length: progressInfo.length - 1, value: new_value });
-                    }
-                } else {
-                    if (progressInfo.length - 1 == 0) {
-                        setProgressInfo({ checked: 0, length: 0, value: 0 });
-                    } else {
-                        new_value = progressInfo.checked / (progressInfo.length - 1);
-                        new_value *= 100;
-                        setProgressInfo({ ...progressInfo, length: progressInfo.length - 1, value: new_value });
-                    }
-                }
+                dispatchProgressInfo({
+                    type: "itemDeleted",
+                    checked: checked,
+                });
+
                 toast({
                     title: " Deleted!",
                     description: "Your card is deleted successfully.",
@@ -86,14 +74,10 @@ function CheckItem({ card, checklist, checkItem, progressInfo, setProgressInfo, 
             },
         })
             .then((response) => {
-                setCheckItems(() => {
-                    return checkItems.map((item) => {
-                        if (item.id == checkItem.id) {
-                            return { ...item, state: stateValue };
-                        } else {
-                            return item;
-                        }
-                    });
+                dispatchCheckItems({
+                    type: "updateState",
+                    stateValue: stateValue,
+                    id: checkItem.id,
                 });
             })
             .catch((error) => {

@@ -41,7 +41,7 @@ import {
 } from "@chakra-ui/react";
 import { EditIcon, CheckIcon, AddIcon } from "@chakra-ui/icons";
 import axios from "axios";
-import { useEffect, useState } from "react";
+import { useEffect, useReducer, useState } from "react";
 import React from "react";
 import CardChecklist from "../CardChecklist/CardChecklist";
 import config from "../../../../../config";
@@ -50,18 +50,32 @@ const apiKey = config.apiKey;
 const token = config.token;
 
 function CardDetails({ card }) {
-    const [checklists, setChecklists] = useState();
-    const [isChecklistLoaded, setIsChecklistsLoaded] = useState(false);
+    const [checklists, dispatchChecklists] = useReducer(checklistsReducer, { data: [], isChecklistLoaded: false });
+
     useEffect(() => {
-        getChecklists(card, setChecklists, checklists, setIsChecklistsLoaded);
+        axios(`https://api.trello.com/1/cards/${card.id}/checklists?key=${apiKey}&token=${token}`, {
+            method: "GET",
+        })
+            .then((response) => {
+                dispatchChecklists({
+                    type: "get",
+                    data: response.data,
+                });
+            })
+            .catch((error) => {
+                dispatchChecklists({
+                    type: "error",
+                    error: error,
+                });
+            });
     }, []);
 
-    if (isChecklistLoaded) {
+    if (checklists.isChecklistLoaded) {
         return (
             <Flex justify={"space-between"} paddingBottom={"2rem"}>
                 <Flex direction={"column"} gap={"2rem"} flexBasis={"75%"}>
-                    {checklists.map((checklist) => {
-                        return <CardChecklist key={checklist.id} checklist={checklist} setChecklists={setChecklists} checklists={checklists} card={card} />;
+                    {checklists.data.map((checklist) => {
+                        return <CardChecklist key={checklist.id} checklist={checklist} dispatchChecklists={dispatchChecklists} card={card} />;
                     })}
                 </Flex>
 
@@ -78,7 +92,7 @@ function CardDetails({ card }) {
                             <Flex marginLeft={"1rem"} gap={"1rem"} alignItems={"center"}>
                                 <AddIcon />
                                 <Editable
-                                    onSubmit={(event) => createChecklist(event, card, checklists, setChecklists, setIsChecklistsLoaded)}
+                                    onSubmit={(event) => createChecklist(event, card, dispatchChecklists)}
                                     placeholder={"Add checklist"}
                                     defaultValue=""
                                     background={"#3B444C"}
@@ -94,7 +108,7 @@ function CardDetails({ card }) {
         );
     }
 }
-function createChecklist(name, card, checklists, setChecklists, setIsChecklistsLoaded) {
+function createChecklist(name, card, dispatchChecklists) {
     if (name == "") {
         return;
     }
@@ -105,23 +119,30 @@ function createChecklist(name, card, checklists, setChecklists, setIsChecklistsL
         },
     })
         .then((response) => {
-            setChecklists([...checklists, response.data]);
-            setIsChecklistsLoaded(true);
+            dispatchChecklists({
+                type: "add",
+                data: response.data,
+            });
         })
         .catch((error) => {
             console.log(error);
         });
 }
-function getChecklists(card, setChecklists, checklists, setIsChecklistsLoaded) {
-    axios(`https://api.trello.com/1/cards/${card.id}/checklists?key=${apiKey}&token=${token}`, {
-        method: "GET",
-    })
-        .then((response) => {
-            setChecklists(response.data);
-            setIsChecklistsLoaded(true);
-        })
-        .catch((error) => {
-            console.log(error);
-        });
+
+function checklistsReducer(checklists, action) {
+    switch (action.type) {
+        case "get": {
+            return { ...checklists, data: action.data, isChecklistLoaded: true };
+        }
+        case "add": {
+            return { ...checklists, data: [...checklists.data, action.data] };
+        }
+        case "delete": {
+            let new_data = checklists.data.filter((item) => {
+                return item.id != action.id;
+            });
+            return { ...checklists, data: new_data };
+        }
+    }
 }
 export default CardDetails;

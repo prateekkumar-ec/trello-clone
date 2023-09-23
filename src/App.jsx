@@ -14,7 +14,7 @@ function App() {
                 <Routes>
                     <Route path="/" element={<Navigate to="/boards" />}></Route>
                     <Route path="/boards" element={<Boards />}></Route>
-                    <Route path="/boards/:id" element={<BoardDetails />}></Route>
+                    <Route path="/boards/:boardName/:id" element={<BoardDetails />}></Route>
                 </Routes>
             </BrowserRouter>
         </>

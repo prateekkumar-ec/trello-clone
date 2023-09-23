@@ -6,7 +6,7 @@ import config from "../../../../../config";
 
 const apiKey = config.apiKey;
 const token = config.token;
-function CreateBoardForm({ boards, setBoards }) {
+function CreateBoardForm({ boards, dispatchBoards }) {
     const [isCreateDisable, setIsCreateDisable] = useState(true);
     const [newBoardName, setNewBoardName] = useState("");
 
@@ -25,7 +25,10 @@ function CreateBoardForm({ boards, setBoards }) {
             method: "POST",
         })
             .then((response) => {
-                setBoards([...boards, response.data]);
+                dispatchBoards({
+                    type: "add",
+                    data: response.data,
+                });
                 toast({
                     title: " Created!",
                     description: "A new Board is created successfully.",
@@ -49,7 +52,7 @@ function CreateBoardForm({ boards, setBoards }) {
         <Stack spacing={4}>
             <FormControl>
                 <FormLabel>Board Title</FormLabel>
-                <Input onKeyDown={handleBordTitleInput} id="boardName"></Input>
+                <Input onChange={handleBordTitleInput} id="boardName"></Input>
             </FormControl>
             <Button className="create-board-button" color={"#1D2125"} background={"#85B8FF"} isDisabled={isCreateDisable} variant="outline" onClick={createBoard}>
                 Create
