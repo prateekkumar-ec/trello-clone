@@ -57,7 +57,7 @@ function Boards() {
         return (
             <>
                 <Flex className={"boards-flex"} width="60%" margin="auto" gap="1.5rem" marginTop={"15rem"} justify={"center"}>
-                    {boards.isError ? <Text color={"white"}>{boards.isError.message}</Text> : <Spinner color="white"></Spinner>}
+                    {boards.isError ? <Text color={"white"}>{"Problem is in boards"}</Text> : <Spinner color="white"></Spinner>}
                 </Flex>
             </>
         );
