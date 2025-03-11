@@ -27,16 +27,60 @@ This is a **Trello Clone** built using **Atlassian's Trello API**. It allows use
 ## 📂 Folder Structure
 
 ```
-├── public/             # Static assets
-├── src/                # Main source code
-│   ├── components/     # Reusable UI components
-│   ├── pages/          # Application pages
-│   ├── services/       # API calls and logic
-│   ├── App.js          # Main application file
-│   ├── main.js         # Entry point
-├── .env                # Environment variables (not committed)
-├── package.json        # Project dependencies
-├── README.md           # Documentation
+.
+├── config.js               # Configuration file
+├── index.html              # Main HTML file
+├── package.json            # Project dependencies and scripts
+├── package-lock.json       # Dependency lock file
+├── public/                 # Public assets
+│   ├── Screenshot-1.png    # Project screenshot
+│   ├── Screenshot-2.png    # Project screenshot
+│   └── vite.svg            # Vite logo
+├── README.md               # Documentation
+├── src/                    # Source code
+│   ├── App.css             # Global styles
+│   ├── App.jsx             # Main app component
+│   ├── assets/             # Icons and images
+│   │   ├── bentoMenu.svg
+│   │   ├── checklistIcon.svg
+│   │   ├── react.svg
+│   │   ├── starIcon.svg
+│   │   └── threeDots.svg
+│   ├── main.jsx            # Entry point
+│   ├── modules/            # Application modules
+│   │   ├── boards/         # Boards-related components
+│   │   │   ├── Board/
+│   │   │   │   ├── Board.css
+│   │   │   │   └── Board.jsx
+│   │   │   ├── Boards/
+│   │   │   │   ├── Boards.css
+│   │   │   │   └── Boards.jsx
+│   │   ├── boardsDetails/  # Board details components
+│   │   │   ├── BoardDetails/
+│   │   │   │   ├── BoardDetails.css
+│   │   │   │   └── BoardDetails.jsx
+│   │   │   ├── BoardList/
+│   │   │   │   ├── BoardList.css
+│   │   │   │   └── BoardList.jsx
+│   │   │   ├── CardChecklist/
+│   │   │   │   └── CardChecklist.jsx
+│   │   │   ├── CardDetails/
+│   │   │   │   └── CardDetails.jsx
+│   │   │   ├── CheckItem/
+│   │   │   │   └── CheckItem.jsx
+│   │   │   ├── ListCard/
+│   │   │   │   └── ListCard.jsx
+│   │   ├── common/         # Common reusable components
+│   │   │   ├── CreateBoardForm/
+│   │   │   │   ├── CreateBoardForm.css
+│   │   │   │   └── CreateBoardForm.jsx
+│   │   │   ├── Header/
+│   │   │   │   ├── Header.css
+│   │   │   │   └── Header.jsx
+│   └── reset.css           # Global reset styles
+├── vercel.json             # Vercel configuration
+└── vite.config.js          # Vite configuration
+
 ```
 
 ## ⚙️ Setup Instructions
