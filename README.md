@@ -10,9 +10,7 @@ This is a **Trello Clone** built using **Atlassian's Trello API**. It allows use
 - 🔹 **Remove Boards** – Ability to delete boards when no longer needed.
 - 🔹 **Create Tasks** – Add new tasks to boards.
 - 🔹 **Remove Tasks** – Delete tasks when completed.
-- 🔹 **Drag and Drop** – Reorganize tasks using a smooth drag-and-drop feature.
 - 🔹 **Real-time Sync** – Data updates instantly using Trello API.
-- 🔹 **Responsive Design** – Works on both desktop and mobile devices.
 
 ## 🖥️ Live Demo
 
